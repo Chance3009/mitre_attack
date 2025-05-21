@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,28 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// MITRE ATT&CK specific colors
+				mitre: {
+					orange: {
+						light: "#FFB380",
+						DEFAULT: "#FF8C3D",
+						dark: "#E56717"
+					},
+					red: {
+						light: "#FF8080",
+						DEFAULT: "#FF4D4D",
+						dark: "#CC0000"
+					},
+					slate: {
+						light: "#E5E7EB",
+						DEFAULT: "#D1D5DB",
+						dark: "#6B7280"
+					},
+					blue: "#3B82F6",
+					purple: "#8B5CF6",
+					technique: "#E5E7EB",
+					subtechnique: "#D1D5DB"
 				}
 			},
 			borderRadius: {
