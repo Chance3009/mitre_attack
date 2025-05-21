@@ -10,7 +10,7 @@ interface MitreContextType {
   setTimeRange: (range: TimeRange) => void;
   setSeverities: (severities: ThreatSeverity[]) => void;
   setStatuses: (statuses: ThreatStatus[]) => void;
-  setTactics: (tactics: string[]) => void;
+  setTacticFilters: (tactics: string[]) => void;
   setShowMappedOnly: (show: boolean) => void;
   setFlatView: (flat: boolean) => void;
   resetFilters: () => void;
@@ -143,7 +143,8 @@ export const MitreProvider = ({ children }: { children: ReactNode }) => {
     setFilters(prev => ({ ...prev, statuses }));
   };
 
-  const setTactics = (tacticIds: string[]) => {
+  // Renamed from setTactics to setTacticFilters to avoid conflict
+  const setTacticFilters = (tacticIds: string[]) => {
     setFilters(prev => ({ ...prev, tactics: tacticIds }));
   };
 
@@ -168,7 +169,7 @@ export const MitreProvider = ({ children }: { children: ReactNode }) => {
         setTimeRange,
         setSeverities,
         setStatuses,
-        setTactics,
+        setTacticFilters,
         setShowMappedOnly,
         setFlatView,
         resetFilters,

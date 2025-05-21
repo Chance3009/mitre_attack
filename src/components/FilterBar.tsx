@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useMitre } from '../context/MitreContext';
 import { 
@@ -22,7 +21,7 @@ const FilterBar: React.FC = () => {
     setTimeRange,
     setSeverities,
     setStatuses,
-    setTactics,
+    setTacticFilters, // Updated from setTactics to setTacticFilters
     setShowMappedOnly,
     setFlatView,
     resetFilters,
@@ -47,9 +46,9 @@ const FilterBar: React.FC = () => {
 
   const handleTacticChange = (tacticId: string) => {
     if (filters.tactics.includes(tacticId)) {
-      setTactics(filters.tactics.filter(id => id !== tacticId));
+      setTacticFilters(filters.tactics.filter(id => id !== tacticId)); // Updated from setTactics to setTacticFilters
     } else {
-      setTactics([...filters.tactics, tacticId]);
+      setTacticFilters([...filters.tactics, tacticId]); // Updated from setTactics to setTacticFilters
     }
   };
 
