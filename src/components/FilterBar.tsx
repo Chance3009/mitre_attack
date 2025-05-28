@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMitre } from '../context/MitreContext';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ThreatSeverity, ThreatStatus } from '../types/mitre';
 import { FilterX } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from "@/components/ui/separator";
 
 const FilterBar: React.FC = () => {
   const {
@@ -21,7 +23,7 @@ const FilterBar: React.FC = () => {
     setTimeRange,
     setSeverities,
     setStatuses,
-    setTacticFilters, // Updated from setTactics to setTacticFilters
+    setTacticFilters,
     setShowMappedOnly,
     setFlatView,
     resetFilters,
@@ -46,9 +48,9 @@ const FilterBar: React.FC = () => {
 
   const handleTacticChange = (tacticId: string) => {
     if (filters.tactics.includes(tacticId)) {
-      setTacticFilters(filters.tactics.filter(id => id !== tacticId)); // Updated from setTactics to setTacticFilters
+      setTacticFilters(filters.tactics.filter(id => id !== tacticId));
     } else {
-      setTacticFilters([...filters.tactics, tacticId]); // Updated from setTactics to setTacticFilters
+      setTacticFilters([...filters.tactics, tacticId]);
     }
   };
 
@@ -68,153 +70,123 @@ const FilterBar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 mb-6">
-      <div className="flex flex-col md:flex-row justify-between mb-4">
-        <div className="mb-4 md:mb-0">
-          <h2 className="text-lg font-semibold mb-2">MITRE ATT&CK Matrix</h2>
-          <p className="text-gray-500 text-sm">
-            Filter and view threat mappings across the MITRE ATT&CK framework
-          </p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={resetFilters}
-            className="flex items-center gap-1"
-          >
-            <FilterX className="h-4 w-4" />
-            Reset Filters
-          </Button>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Time Range Filter */}
-        <div>
-          <label className="block text-sm font-medium mb-2" htmlFor="time-range">
-            Time Range
-          </label>
-          <Select
-            value={filters.timeRange}
-            onValueChange={(value: any) => setTimeRange(value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="24h">Last 24 hours</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="all">All time</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-2">
+      <Card>
+        <CardContent className="p-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs">Time:</Label>
+              <Select value={filters.timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="h-7 text-xs w-[120px]">
+                  <SelectValue placeholder="Select time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24h">Last 24 hours</SelectItem>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Severity Filter */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Severity
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {['Critical', 'High', 'Medium', 'Low'].map((severity) => (
-              <div key={severity} className="flex items-center">
-                <Checkbox
-                  id={`severity-${severity}`}
-                  checked={filters.severities.includes(severity as ThreatSeverity)}
-                  onCheckedChange={() => handleSeverityChange(severity as ThreatSeverity)}
-                  className="mr-1"
-                />
-                <Label
-                  htmlFor={`severity-${severity}`}
-                  className="flex items-center text-sm cursor-pointer"
+            <Separator orientation="vertical" className="h-4" />
+
+            <div className="flex items-center gap-2">
+              <Label className="text-xs">Severity:</Label>
+              {['Critical', 'High', 'Medium', 'Low'].map((severity) => (
+                <Badge
+                  key={severity}
+                  variant="outline"
+                  className={`cursor-pointer flex items-center gap-1 h-5 text-[10px] ${filters.severities.includes(severity as ThreatSeverity)
+                      ? 'bg-slate-100'
+                      : 'opacity-50'
+                    }`}
+                  onClick={() => handleSeverityChange(severity as ThreatSeverity)}
                 >
-                  <span 
-                    className={`inline-block w-2 h-2 rounded-full ${severityColors[severity as ThreatSeverity]} mr-1`}
-                  ></span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${severityColors[severity as ThreatSeverity]}`} />
                   {severity}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
+                </Badge>
+              ))}
+            </div>
 
-        {/* Status Filter */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Status
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {['Detected', 'Investigating', 'Contained', 'Remediated', 'Blocked'].map((status) => (
-              <div key={status} className="flex items-center">
-                <Checkbox
-                  id={`status-${status}`}
-                  checked={filters.statuses.includes(status as ThreatStatus)}
-                  onCheckedChange={() => handleStatusChange(status as ThreatStatus)}
-                  className="mr-1"
-                />
-                <Label
-                  htmlFor={`status-${status}`}
-                  className="flex items-center text-sm cursor-pointer"
+            <Separator orientation="vertical" className="h-4" />
+
+            <div className="flex items-center gap-2">
+              <Label className="text-xs">Status:</Label>
+              {['Detected', 'Investigating', 'Contained', 'Remediated', 'Blocked'].map((status) => (
+                <Badge
+                  key={status}
+                  variant="outline"
+                  className={`cursor-pointer flex items-center gap-1 h-5 text-[10px] ${filters.statuses.includes(status as ThreatStatus)
+                      ? 'bg-slate-100'
+                      : 'opacity-50'
+                    }`}
+                  onClick={() => handleStatusChange(status as ThreatStatus)}
                 >
-                  <span 
-                    className={`inline-block w-2 h-2 rounded-full ${statusColors[status as ThreatStatus]} mr-1`}
-                  ></span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusColors[status as ThreatStatus]}`} />
                   {status}
-                </Label>
+                </Badge>
+              ))}
+            </div>
+
+            <Separator orientation="vertical" className="h-4" />
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <Switch
+                  id="mapped-only"
+                  checked={filters.showMappedOnly}
+                  onCheckedChange={setShowMappedOnly}
+                  className="h-4 w-7"
+                />
+                <Label htmlFor="mapped-only" className="text-xs">Mapped</Label>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* View Options */}
-        <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium mb-2">
-            View Options
-          </label>
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="mapped-toggle" className="cursor-pointer">
-                Show mapped threats only
-              </Label>
-              <Switch
-                id="mapped-toggle"
-                checked={filters.showMappedOnly}
-                onCheckedChange={setShowMappedOnly}
-              />
+              <div className="flex items-center gap-1">
+                <Switch
+                  id="flat-view"
+                  checked={filters.flatView}
+                  onCheckedChange={setFlatView}
+                  className="h-4 w-7"
+                />
+                <Label htmlFor="flat-view" className="text-xs">Flat</Label>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="flat-toggle" className="cursor-pointer">
-                Flat view
-              </Label>
-              <Switch
-                id="flat-toggle"
-                checked={filters.flatView}
-                onCheckedChange={setFlatView}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Tactics Filter */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium mb-2">
-          Tactics
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {tactics.map((tactic) => (
-            <Badge
-              key={tactic.id}
-              variant={filters.tactics.includes(tactic.id) ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => handleTacticChange(tactic.id)}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetFilters}
+              className="h-7 text-xs ml-auto"
             >
-              {tactic.name}
-            </Badge>
-          ))}
-        </div>
-      </div>
+              <FilterX className="h-3 w-3 mr-1" />
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-slate-50/50">
+        <CardContent className="py-1.5 px-2">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs whitespace-nowrap">Categories:</Label>
+            <div className="flex-1 flex flex-wrap gap-1">
+              {tactics.map((tactic) => (
+                <Badge
+                  key={tactic.id}
+                  variant="outline"
+                  className={`cursor-pointer whitespace-nowrap text-[10px] h-5 ${filters.tactics.includes(tactic.id)
+                      ? 'bg-slate-100'
+                      : 'opacity-50'
+                    }`}
+                  onClick={() => handleTacticChange(tactic.id)}
+                >
+                  {tactic.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
