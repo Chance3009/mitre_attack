@@ -4,6 +4,12 @@ import { Technique, Subtechnique } from '../types/mitre';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MitreTechniqueCardProps {
   technique: Technique;
@@ -51,6 +57,24 @@ const getHeatmapColor = (threatCount: number) => {
 
   return `rgb(${r}, ${g}, ${b})`;
 };
+
+// Helper component for truncated text with tooltip
+const TruncatedText: React.FC<{ text: string; id?: string }> = ({ text, id }) => (
+  <TooltipProvider delayDuration={200}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="truncate">
+          {text}
+          {id && <span className="text-[10px] ml-1 opacity-60">{id}</span>}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs max-w-[300px] break-words">
+        {text}
+        {id && <span className="ml-1 opacity-60">{id}</span>}
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
 
 // Subtechnique card component
 export const MitreSubtechniqueCard: React.FC<MitreSubtechniqueCardProps> = ({
@@ -149,14 +173,6 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
   // Calculate heatmap color for technique
   const heatmapColor = getHeatmapColor(totalThreatCount);
 
-  const handleExpandToggle = (e: React.MouseEvent) => {
-    // Only if there are subtechniques
-    if (hasSubtechniques) {
-      e.stopPropagation();
-      toggleTechniqueExpanded(technique.id);
-    }
-  };
-
   const handleCardClick = () => {
     // If there are direct threats, select the first one
     if (directThreatCount > 0) {
@@ -192,12 +208,11 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
           <div className="flex justify-between items-start gap-2">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1 mb-0.5">
-                <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px] px-1 py-0">
+                <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px] px-1 py-0 shrink-0">
                   T
                 </Badge>
-                <div className="font-medium text-xs truncate">
-                  {technique.name}
-                  <span className="text-[10px] ml-1 opacity-60">{technique.id}</span>
+                <div className="font-medium text-xs min-w-0">
+                  <TruncatedText text={technique.name} id={technique.id} />
                 </div>
               </div>
 
@@ -239,12 +254,11 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
               <div className="flex justify-between items-start gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-0.5">
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px] px-1 py-0">
+                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px] px-1 py-0 shrink-0">
                       S
                     </Badge>
-                    <div className="font-medium text-xs truncate">
-                      {subtechnique.name}
-                      <span className="text-[10px] ml-1 opacity-60">{subtechnique.id}</span>
+                    <div className="font-medium text-xs min-w-0">
+                      <TruncatedText text={subtechnique.name} id={subtechnique.id} />
                     </div>
                   </div>
 
@@ -267,14 +281,18 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
     <Collapsible
       open={isExpanded}
       onOpenChange={() => hasSubtechniques && toggleTechniqueExpanded(technique.id)}
-      className="mb-2"
+      className="mb-1.5"
     >
       <div
         className={`
           p-2 rounded-md border transition-all cursor-pointer hover:shadow-md
           ${selectedThreat && selectedThreat.techniqueId === technique.id ? 'ring-2 ring-blue-500' : ''}
         `}
-        onClick={handleCardClick}
+        onClick={() => {
+          if (directThreatCount > 0) {
+            handleCardClick();
+          }
+        }}
         style={{
           backgroundColor: totalThreatCount > 0 ? heatmapColor : '#f8fafc',
           color: '#1e293b'
@@ -282,9 +300,8 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
       >
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-xs truncate">
-              {technique.name}
-              <span className="text-[10px] ml-1 opacity-80">{technique.id}</span>
+            <div className="font-medium text-xs min-w-0">
+              <TruncatedText text={technique.name} id={technique.id} />
             </div>
 
             <div className="flex items-center gap-1 mt-0.5">
@@ -296,15 +313,15 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
 
               {subtechniqueThreatCount > 0 && (
                 <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-[10px] px-1 py-0">
-                  +{subtechniqueThreatCount}
+                  +{subtechniqueThreatCount} sub
                 </Badge>
               )}
             </div>
           </div>
 
           {hasSubtechniques && (
-            <CollapsibleTrigger asChild onClick={handleExpandToggle}>
-              <div className="flex items-center justify-center w-4 h-4">
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-center w-4 h-4 hover:bg-slate-100 rounded cursor-pointer shrink-0" onClick={(e) => e.stopPropagation()}>
                 <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
               </div>
             </CollapsibleTrigger>
@@ -313,13 +330,44 @@ const MitreTechniqueCard: React.FC<MitreTechniqueCardProps> = ({ technique, tact
       </div>
 
       {hasSubtechniques && (
-        <CollapsibleContent className="mt-2 ml-4 space-y-2">
+        <CollapsibleContent className="mt-1.5 ml-3 space-y-1.5">
           {technique.subtechniques.map((subtechnique) => (
-            <MitreSubtechniqueCard
+            <div
               key={subtechnique.id}
-              subtechnique={subtechnique}
-              parentTechnique={technique}
-            />
+              className={`
+                p-2 rounded-md border transition-all cursor-pointer hover:shadow-md
+                ${selectedThreat && selectedThreat.techniqueId === subtechnique.id ? 'ring-2 ring-blue-500' : ''}
+              `}
+              onClick={() => {
+                const threat = filteredThreats.find(
+                  (threat) => threat.techniqueId === subtechnique.id
+                );
+                setSelectedThreat(threat || null);
+              }}
+              style={{
+                backgroundColor: filteredThreats.some(t => t.techniqueId === subtechnique.id) ? heatmapColor : '#f8fafc',
+                color: '#1e293b'
+              }}
+            >
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px] px-1 py-0 shrink-0">
+                      S
+                    </Badge>
+                    <div className="font-medium text-xs min-w-0">
+                      <TruncatedText text={subtechnique.name} id={subtechnique.id} />
+                    </div>
+                  </div>
+
+                  {filteredThreats.some(t => t.techniqueId === subtechnique.id) && (
+                    <Badge variant="secondary" className="mt-1 bg-white/20 hover:bg-white/30 text-[10px] px-1 py-0">
+                      {filteredThreats.filter(t => t.techniqueId === subtechnique.id).length}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
           ))}
         </CollapsibleContent>
       )}
